@@ -190,7 +190,7 @@ let lang = (navigator.language || 'es').startsWith('es') ? 'es' : 'en';
 let info = null, paso = 1, huespedes = [{}];
 const $ = id => document.getElementById(id);
 const t = (k, v = {}) => String(T[lang][k]).replace(/\{(\w)\}/g, (_, x) => v[x] ?? '');
-const clienteId = new URLSearchParams(location.search).get('c') || '';
+const clienteId = new URLSearchParams(location.search).get('id') || '';
 
 function traducir() {
   document.documentElement.lang = lang;
@@ -205,7 +205,7 @@ async function cargar() {
   traducir();
   if (!clienteId) return noDisponible('noExiste');
   try {
-    const r = await fetch(API_URL + '?c=' + encodeURIComponent(clienteId));
+    const r = await fetch(API_URL + '?id=' + encodeURIComponent(clienteId));
     const d = await r.json();
     if (!d.ok) return noDisponible(d.motivo === 'pausado' ? 'pausado' : 'noExiste');
     info = d;
@@ -306,7 +306,7 @@ $('form').onsubmit = async e => {
 
   const btn = $('enviar'); btn.disabled = true; btn.querySelector('span').textContent = t('enviando');
   $('aviso').style.display = 'none';
-  const datos = { c: clienteId, web: $('web').value, codigo: $('codigo').value.trim(), entrada: $('entrada').value, salida: $('salida').value,
+  const datos = { cliente: clienteId, web: $('web').value, codigo: $('codigo').value.trim(), entrada: $('entrada').value, salida: $('salida').value,
     horaLlegada: $('horaLlegada').value, placa: $('tieneVehiculo').checked ? $('placa').value.trim().toUpperCase() : '',
     consentimiento: true, huespedes };
   try {
