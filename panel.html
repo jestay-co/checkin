@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Panel · Check-in JE STAY</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#14223B;--muted:#5B6577;--line:#DCD8CF;--ground:#F6F4EF;--accent:#0E6B62;--soft:#E3F1EE;--accent-dark:#0A4F48}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);font-family:Inter,system-ui,sans-serif;color:var(--ink)}
+.app{max-width:540px;margin:0 auto;padding:18px 16px 48px}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.marca{display:flex;align-items:center;gap:10px}
+.logo{width:38px;height:38px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center}
+.marca b{font-family:Manrope,sans-serif;font-size:16px;display:block}.marca small{font-size:12px;color:var(--muted)}
+.salir{border:1px solid var(--line);background:#fff;border-radius:10px;height:36px;padding:0 12px;font:600 13px Inter,sans-serif;color:var(--ink);cursor:pointer}
+.card{background:#fff;border:1px solid #E6E2D9;border-radius:18px;padding:18px;margin-bottom:12px}
+h1{font-family:Manrope,sans-serif;font-size:20px;margin:0 0 6px}
+h3{font-size:13px;color:var(--accent);margin:18px 0 2px}h3:first-child{margin-top:0}
+p.intro{margin:0 0 6px;color:var(--muted);font-size:14px;line-height:1.5}
+label{display:block;font-size:13px;font-weight:600;margin:12px 0 5px}
+input,select{width:100%;height:46px;border:1px solid var(--line);border-radius:12px;padding:0 12px;font:16px Inter,sans-serif;color:var(--ink);background:#FBFAF7}
+input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(14,107,98,.15)}
+.fila{display:flex;gap:10px}.fila>div{flex:1;min-width:0}
+.ayuda{font-size:12px;color:var(--muted);margin-top:5px}
+.btn{width:100%;height:52px;border:none;border-radius:14px;background:var(--accent);color:#fff;font:600 16px Inter,sans-serif;margin-top:18px;cursor:pointer}
+.btn:disabled{opacity:.6}
+.tabs{display:flex;gap:6px;margin-bottom:12px}
+.tabs button{flex:1;height:44px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);font:600 14px Inter,sans-serif;cursor:pointer}
+.tabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.msg{margin-top:12px;font-size:14px;line-height:1.5}
+.ok{background:var(--soft);color:var(--accent-dark);padding:12px;border-radius:12px;word-break:break-all}
+.err{background:#FCEBEB;color:#791F1F;padding:12px;border-radius:12px}
+.cli{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 0;border-bottom:1px solid #EFECE5}
+.cli:last-child{border:none}.cli b{display:block}.cli small{color:var(--muted);font-size:12px;display:block;margin:2px 0 6px}
+.pill{font-size:11px;font-weight:600;padding:3px 9px;border-radius:999px}
+.ACTIVO{background:var(--soft);color:var(--accent-dark)}.PAUSADO{background:#FAEEDA;color:#633806}
+.acciones{display:flex;flex-direction:column;gap:6px}
+.mini{height:38px;padding:0 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font:600 13px Inter,sans-serif;color:var(--ink);cursor:pointer;white-space:nowrap}
+.check{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted);margin-top:12px}
+.check input{width:18px;height:18px;accent-color:var(--accent)}
+.oculto{display:none!important}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div class="marca">
+      <div class="logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg></div>
+      <div><b>Panel · Check-in JE STAY</b><small>Solo para administración</small></div>
+    </div>
+    <button type="button" class="salir oculto" id="salir">Salir</button>
+  </div>
+
+  <!-- ENTRAR -->
+  <form id="entrar" class="card">
+    <h1>Entrar al panel</h1>
+    <p class="intro">Escribe la clave del panel.</p>
+    <label for="clave">Clave</label>
+    <input id="clave" type="password" autocomplete="current-password" required>
+    <label class="check"><input type="checkbox" id="recordar" checked> Recordar en este dispositivo</label>
+    <button class="btn" type="submit" id="btnEntrar">Entrar</button>
+    <div class="msg" id="msgEntrar"></div>
+  </form>
+
+  <!-- PANEL -->
+  <div id="panel" class="oculto">
+    <div class="tabs">
+      <button type="button" id="tNuevo" class="on">Nuevo cliente</button>
+      <button type="button" id="tClientes">Clientes</button>
+    </div>
+
+    <form id="nuevo" class="card">
+      <h3>Propietario</h3>
+      <label for="propietario">Nombre completo *</label><input id="propietario" required>
+      <div class="fila">
+        <div><label for="cedula">Cédula / NIT</label><input id="cedula" inputmode="numeric"></div>
+        <div><label for="whatsapp">WhatsApp *</label><input id="whatsapp" required inputmode="tel" placeholder="+57 300 000 0000"></div>
+      </div>
+      <label for="correo">Correo *</label><input id="correo" type="email" required>
+
+      <h3>Apartamento</h3>
+      <div class="fila">
+        <div><label for="edificio">Edificio *</label><input id="edificio" required placeholder="Salguero Suites"></div>
+        <div><label for="apartamento">Apto *</label><input id="apartamento" required placeholder="517"></div>
+      </div>
+      <div class="fila">
+        <div><label for="horaEntrada">Entrada</label><input id="horaEntrada" value="3:00 p. m."></div>
+        <div><label for="horaSalida">Salida</label><input id="horaSalida" value="12:00 m."></div>
+        <div><label for="maxHuespedes">Máx.</label><input id="maxHuespedes" type="number" min="1" max="20" value="4"></div>
+      </div>
+
+      <h3>Huésped Manager</h3>
+      <label for="urlHM">Dirección del edificio *</label><input id="urlHM" required placeholder="salguero.huespedmanager.com">
+      <div class="fila">
+        <div><label for="usuarioHM">Usuario *</label><input id="usuarioHM" required autocomplete="off"></div>
+        <div><label for="claveHM">Clave *</label><input id="claveHM" type="password" required autocomplete="new-password"></div>
+      </div>
+      <div class="ayuda">La clave no se guarda en la hoja: queda en la zona privada del sistema.</div>
+
+      <h3>Aseo y plan</h3>
+      <label for="correosAseo">Correo(s) del personal de aseo *</label>
+      <input id="correosAseo" required placeholder="aseo1@gmail.com, aseo2@gmail.com">
+      <div class="fila">
+        <div><label for="plan">Plan</label><select id="plan"><option>Básico</option><option>Premium (con TRA)</option></select></div>
+        <div><label for="proximoPago">Próximo pago</label><input id="proximoPago" type="date"></div>
+      </div>
+      <button class="btn" id="btnCrear" type="submit">Crear cliente y enviar bienvenida</button>
+      <div class="msg" id="msgCrear"></div>
+    </form>
+
+    <div id="clientes" class="oculto">
+      <div class="card"><div id="lista">Cargando…</div></div>
+      <form class="card" id="formClave">
+        <h3>Cambiar clave de Huésped Manager</h3>
+        <div class="fila">
+          <div><label for="cId">ID del cliente</label><input id="cId" placeholder="CX1A2B3C" required></div>
+          <div><label for="cClave">Nueva clave</label><input id="cClave" type="password" autocomplete="new-password" required></div>
+        </div>
+        <button class="btn" type="submit">Actualizar clave</button>
+        <div class="msg" id="msgClave"></div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_URL = 'https://script.google.com/macros/s/AKfycbyWmI8cPMKA1e286-Xe8MUNn-2Kb1rebqCHjd8fDPRUKed7xPmvxk3A6MxrGqY0fWAX/exec';
+const CAMPOS = ['propietario','cedula','whatsapp','correo','edificio','apartamento','horaEntrada','horaSalida',
+  'maxHuespedes','urlHM','usuarioHM','claveHM','correosAseo','plan','proximoPago'];
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let CLAVE = '';
+const guardar = v => { try { v ? localStorage.setItem('cjs_clave', v) : localStorage.removeItem('cjs_clave'); } catch (e) {} };
+const leer = () => { try { return localStorage.getItem('cjs_clave') || ''; } catch (e) { return ''; } };
+
+async function api(accion, extra) {
+  const r = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(Object.assign({ accion, clave: CLAVE }, extra || {})) });
+  const d = await r.json();
+  if (!d.ok) throw new Error(d.error || 'Algo salió mal.');
+  return d.datos;
+}
+const msg = (id, tipo, html) => { $(id).innerHTML = html ? '<div class="' + tipo + '">' + html + '</div>' : ''; };
+
+function mostrarPanel(si) {
+  $('entrar').classList.toggle('oculto', si); $('panel').classList.toggle('oculto', !si); $('salir').classList.toggle('oculto', !si);
+}
+
+$('entrar').onsubmit = async e => {
+  e.preventDefault();
+  CLAVE = $('clave').value.trim(); msg('msgEntrar');
+  $('btnEntrar').disabled = true; $('btnEntrar').textContent = 'Entrando…';
+  try {
+    await api('entrar');
+    if ($('recordar').checked) guardar(CLAVE);
+    mostrarPanel(true);
+  } catch (err) { msg('msgEntrar', 'err', esc(err.message === 'Acceso no autorizado.' ? 'Clave incorrecta.' : err.message)); }
+  $('btnEntrar').disabled = false; $('btnEntrar').textContent = 'Entrar';
+};
+$('salir').onclick = () => { guardar(''); CLAVE = ''; $('clave').value = ''; mostrarPanel(false); };
+
+function ver(cual) {
+  $('nuevo').classList.toggle('oculto', cual !== 'nuevo'); $('clientes').classList.toggle('oculto', cual !== 'clientes');
+  $('tNuevo').classList.toggle('on', cual === 'nuevo'); $('tClientes').classList.toggle('on', cual === 'clientes');
+  if (cual === 'clientes') cargarClientes();
+}
+$('tNuevo').onclick = () => ver('nuevo');
+$('tClientes').onclick = () => ver('clientes');
+
+$('nuevo').onsubmit = async e => {
+  e.preventDefault();
+  const datos = {}; CAMPOS.forEach(k => datos[k] = $(k).value);
+  const b = $('btnCrear'); b.disabled = true; b.textContent = 'Creando…'; msg('msgCrear');
+  try {
+    const r = await api('crear', { datos });
+    $('nuevo').reset();
+    msg('msgCrear', 'ok', '✅ Cliente <b>' + esc(r.id) + '</b> creado y bienvenida enviada.<br><br>Enlace de check-in:<br><b>' + esc(r.enlace) + '</b>');
+  } catch (err) { msg('msgCrear', 'err', esc(err.message)); }
+  b.disabled = false; b.textContent = 'Crear cliente y enviar bienvenida';
+};
+
+async function cargarClientes() {
+  $('lista').textContent = 'Cargando…';
+  try {
+    const lista = await api('listar');
+    if (!lista.length) { $('lista').textContent = 'Aún no tienes clientes.'; return; }
+    $('lista').innerHTML = lista.map(c =>
+      '<div class="cli"><div><b>' + esc(c.apto) + '</b><small>' + esc(c.propietario) + ' · ' + esc(c.id) + '</small>' +
+      '<span class="pill ' + esc(c.estado) + '">' + esc(c.estado) + '</span></div>' +
+      '<div class="acciones"><button class="mini" type="button" data-estado="' + esc(c.id) + '">' + (c.estado === 'ACTIVO' ? 'Pausar' : 'Activar') + '</button>' +
+      '<button class="mini" type="button" data-copiar="' + esc(c.enlace) + '">Copiar enlace</button></div></div>').join('');
+    document.querySelectorAll('[data-estado]').forEach(b => b.onclick = async () => {
+      b.disabled = true;
+      try { await api('estado', { id: b.dataset.estado }); cargarClientes(); } catch (err) { b.disabled = false; alerta(err.message); }
+    });
+    document.querySelectorAll('[data-copiar]').forEach(b => b.onclick = async () => {
+      try { await navigator.clipboard.writeText(b.dataset.copiar); b.textContent = '¡Copiado!'; } catch (e) { b.textContent = b.dataset.copiar; }
+    });
+  } catch (err) { $('lista').innerHTML = '<div class="err">' + esc(err.message) + '</div>'; }
+}
+function alerta(t) { $('lista').insertAdjacentHTML('afterbegin', '<div class="err">' + esc(t) + '</div>'); }
+
+$('formClave').onsubmit = async e => {
+  e.preventDefault(); msg('msgClave');
+  try { const t = await api('clave', { id: $('cId').value, nueva: $('cClave').value }); $('cClave').value = ''; msg('msgClave', 'ok', esc(t)); }
+  catch (err) { msg('msgClave', 'err', esc(err.message)); }
+};
+
+(async () => {
+  const guardada = leer();
+  if (!guardada) return;
+  CLAVE = guardada;
+  try { await api('entrar'); mostrarPanel(true); } catch (e) { guardar(''); CLAVE = ''; }
+})();
+</script>
+</body>
+</html>
