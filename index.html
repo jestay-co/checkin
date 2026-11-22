@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Check-in · Check-in JE STAY</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#14223B;--muted:#5B6577;--line:#DCD8CF;--ground:#F6F4EF;--accent:#0E6B62;--accent-dark:#0A4F48;--soft:#E3F1EE;--danger:#A32D2D}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);font-family:Inter,system-ui,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+.app{max-width:460px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;padding-bottom:24px}
+.top{display:flex;align-items:center;justify-content:space-between;padding:20px 20px 12px}
+.marca{display:flex;align-items:center;gap:10px}
+.logo{width:36px;height:36px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center}
+.marca b{font-family:Manrope,sans-serif;font-size:16px;display:block}.marca small{font-size:11px;color:var(--muted)}
+.idioma{display:flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:#fff}
+.idioma button{border:none;background:transparent;color:var(--muted);font:600 12px Inter,sans-serif;padding:6px 12px;border-radius:999px;min-height:32px;cursor:pointer}
+.idioma button.on{background:var(--ink);color:#fff}
+.aloja{margin:4px 20px 0;background:var(--ink);border-radius:18px;padding:20px;color:#fff}
+.aloja small{font-size:12px;color:#B9C2D3}.aloja h2{font-family:Manrope,sans-serif;font-size:22px;margin:4px 0}
+.aloja p{margin:0;font-size:14px;color:#D5DBE6}
+.horas{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.horas div{background:rgba(255,255,255,.08);border-radius:12px;padding:10px 12px}
+.horas span{display:block;font-size:11px;color:#B9C2D3}.horas b{font-size:15px}
+.progreso{padding:22px 20px 0}
+.progreso .txt{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:8px}
+.progreso .txt b{color:var(--accent)}
+.barras{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.barras i{height:5px;border-radius:3px;background:var(--line)}.barras i.on{background:var(--accent)}
+.card{margin:16px 20px 0;background:#fff;border:1px solid #E6E2D9;border-radius:18px;padding:20px}
+.card h1{font-family:Manrope,sans-serif;font-size:20px;margin:0 0 4px}.card h3{font-family:Manrope,sans-serif;font-size:17px;margin:0}
+.intro{margin:0 0 6px;font-size:14px;line-height:1.5;color:var(--muted)}
+.campo{display:flex;flex-direction:column;gap:6px;margin-top:14px}
+.campo label{font-size:13px;font-weight:600}
+.campo input,.campo select{height:48px;border:1px solid var(--line);border-radius:12px;padding:0 14px;font:16px Inter,sans-serif;color:var(--ink);background:#FBFAF7;width:100%;appearance:none}
+.campo input:focus,.campo select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(14,107,98,.15)}
+.campo.mal input,.campo.mal select{border-color:var(--danger)}
+.ayuda{font-size:12px;color:var(--muted)}.error{font-size:12px;color:var(--danger);display:none}.campo.mal .error{display:block}
+.dos{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cab{display:flex;align-items:center;justify-content:space-between}.cab .num{display:flex;align-items:center;gap:10px}
+.circ{width:34px;height:34px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;font:700 14px Manrope,sans-serif;color:var(--accent-dark)}
+.quitar{border:none;background:transparent;color:var(--danger);font:600 13px Inter,sans-serif;min-height:44px;cursor:pointer}
+.agregar{margin:12px 20px 0;height:52px;border:1.5px dashed #B9B3A6;border-radius:14px;background:transparent;color:var(--ink);font:600 15px Inter,sans-serif;cursor:pointer;width:calc(100% - 40px)}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.45;color:#3E4859;margin-top:12px;cursor:pointer}
+.check input{width:20px;height:20px;margin:1px 0 0;flex-shrink:0;accent-color:var(--accent)}
+.seguro{margin:14px 20px 0;display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:14px;background:var(--soft);font-size:13px;line-height:1.45;color:var(--accent-dark)}
+.pie{padding:18px 20px 0;display:flex;flex-direction:column;gap:10px}
+.btn{height:54px;border:none;border-radius:14px;background:var(--accent);color:#fff;font:600 16px Inter,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn:disabled{opacity:.6}
+.sec{height:48px;border:1px solid var(--line);border-radius:14px;background:#fff;color:var(--ink);font:600 15px Inter,sans-serif;cursor:pointer}
+.nota{text-align:center;font-size:12px;color:var(--muted)}
+.aviso{margin:16px 20px 0;padding:12px 14px;border-radius:12px;background:#FCEBEB;color:#791F1F;font-size:14px;display:none}
+.listo{text-align:center;padding:40px 28px 0}
+.listo .ok{width:84px;height:84px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+.listo .ok div{width:56px;height:56px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center}
+.listo h1{font-family:Manrope,sans-serif;font-size:26px;margin:0 0 10px;line-height:1.2}
+.listo p{margin:0;font-size:15px;line-height:1.5;color:var(--muted)}
+.resumen{padding:6px 20px}.resumen div{display:flex;justify-content:space-between;gap:12px;padding:13px 0;border-bottom:1px solid #EFECE5;font-size:14px}
+.resumen div:last-child{border:none}.resumen span{color:var(--muted)}.resumen b{text-align:right}
+.oculto{display:none!important}
+.trampa{position:absolute;left:-9999px}
+.cargando{padding:80px 20px;text-align:center;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div class="marca">
+      <div class="logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg></div>
+      <div><b id="producto">Check-in JE STAY</b><small>by JE STAY</small></div>
+    </div>
+    <div class="idioma" role="group" aria-label="Idioma">
+      <button type="button" id="es" class="on">ES</button><button type="button" id="en">EN</button>
+    </div>
+  </div>
+
+  <div id="cargando" class="cargando" data-t="cargando">Cargando tu alojamiento…</div>
+  <div id="noDisponible" class="card oculto"><h1 data-t="noDispTit">Enlace no disponible</h1><p class="intro" id="noDispTxt"></p></div>
+
+  <form id="form" class="oculto" novalidate>
+    <div class="aloja">
+      <small data-t="tuAloja">Tu alojamiento</small>
+      <h2 id="apto"></h2><p id="edif"></p>
+      <div class="horas">
+        <div><span data-t="entradaDesde">Entrada desde</span><b id="hEnt"></b></div>
+        <div><span data-t="salidaHasta">Salida hasta</span><b id="hSal"></b></div>
+      </div>
+    </div>
+
+    <div class="progreso">
+      <div class="txt"><b id="pasoTxt"></b><span id="pasoNom"></span></div>
+      <div class="barras"><i class="on"></i><i id="b2"></i><i id="b3"></i></div>
+    </div>
+
+    <!-- PASO 1 -->
+    <section id="paso1">
+      <div class="card">
+        <h1 data-t="hola">Hola, bienvenido</h1>
+        <p class="intro" data-t="introTxt">Completa tu registro antes de llegar. Toma menos de 3 minutos y así entras directo, sin filas en portería.</p>
+        <div class="campo"><label for="codigo" data-t="codigo">Código de reserva</label>
+          <input id="codigo" autocomplete="off" placeholder="HMABC12345" required>
+          <span class="ayuda" data-t="codigoAyuda">Lo encuentras en tu confirmación de Airbnb.</span>
+          <span class="error" data-t="req">Este dato es obligatorio.</span></div>
+        <div class="dos">
+          <div class="campo"><label for="entrada" data-t="entrada">Entrada</label><input id="entrada" type="date" required><span class="error" data-t="req">Este dato es obligatorio.</span></div>
+          <div class="campo"><label for="salida" data-t="salida">Salida</label><input id="salida" type="date" required><span class="error" id="errSalida" data-t="req">Este dato es obligatorio.</span></div>
+        </div>
+        <div class="campo"><label for="horaLlegada" data-t="horaLlegada">Hora aproximada de llegada</label><input id="horaLlegada" type="time"></div>
+      </div>
+      <div class="seguro">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0A4F48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+        <span data-t="seguro">Tus datos viajan protegidos y solo se usan para tu ingreso al edificio y el registro exigido por ley.</span>
+      </div>
+      <div class="pie"><button type="button" class="btn" id="sig1"><span data-t="continuar">Continuar</span> →</button></div>
+    </section>
+
+    <!-- PASO 2 -->
+    <section id="paso2" class="oculto">
+      <div id="huespedes"></div>
+      <button type="button" class="agregar" id="agregar"></button>
+      <div class="card">
+        <label class="check" style="margin-top:0"><input type="checkbox" id="tieneVehiculo"><span data-t="vehiculo">Llego en vehículo</span></label>
+        <div class="campo oculto" id="campoPlaca"><label for="placa" data-t="placa">Placa</label><input id="placa" placeholder="ABC123" autocomplete="off"></div>
+        <label class="check"><input type="checkbox" id="consentimiento"><span><span data-t="consent">Autorizo el tratamiento de mis datos personales para mi registro de ingreso, según la Ley 1581 de 2012.</span></span></label>
+        <span class="error" id="errConsent" data-t="errConsent">Debes aceptar para continuar.</span>
+      </div>
+      <input class="trampa" id="web" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <div class="aviso" id="aviso"></div>
+      <div class="pie">
+        <button type="submit" class="btn" id="enviar"><span data-t="enviar">Enviar registro</span></button>
+        <button type="button" class="sec" id="atras" data-t="atras">Volver</button>
+        <span class="nota" data-t="envioSeguro">Envío seguro</span>
+      </div>
+    </section>
+  </form>
+
+  <!-- PASO 3 -->
+  <section id="paso3" class="oculto">
+    <div class="listo">
+      <div class="ok"><div><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg></div></div>
+      <h1 id="listoTit"></h1>
+      <p data-t="listoTxt">Tu registro ya quedó enviado. Solo presenta tu documento al llegar.</p>
+    </div>
+    <div class="card resumen" id="resumen"></div>
+    <div class="seguro"><span data-t="copia">Te enviamos una copia de este registro a tu correo.</span></div>
+  </section>
+</div>
+
+<script>
+/* ⬇️ Pega aquí la URL de tu aplicación web de Apps Script (termina en /exec) */
+const API_URL = 'https://script.google.com/macros/s/AKfycbyWmI8cPMKA1e286-Xe8MUNn-2Kb1rebqCHjd8fDPRUKed7xPmvxk3A6MxrGqY0fWAX/exec';
+
+const T = {
+  es: { cargando:'Cargando tu alojamiento…', noDispTit:'Enlace no disponible', noExiste:'Este enlace no es válido. Pídele el enlace correcto a tu anfitrión.',
+    pausado:'Este servicio está pausado. Comunícate con tu anfitrión.', tuAloja:'Tu alojamiento', entradaDesde:'Entrada desde', salidaHasta:'Salida hasta',
+    paso:'Paso {n} de 3', p1:'Datos de la reserva', p2:'Datos de los huéspedes', hola:'Hola, bienvenido',
+    introTxt:'Completa tu registro antes de llegar. Toma menos de 3 minutos y así entras directo, sin filas en portería.',
+    codigo:'Código de reserva', codigoAyuda:'Lo encuentras en tu confirmación de Airbnb.', req:'Este dato es obligatorio.', entrada:'Entrada', salida:'Salida',
+    horaLlegada:'Hora aproximada de llegada', seguro:'Tus datos viajan protegidos y solo se usan para tu ingreso al edificio y el registro exigido por ley.',
+    continuar:'Continuar', titular:'Huésped titular', acomp:'Acompañante', quitar:'Quitar', nombres:'Nombres', apellidos:'Apellidos', documento:'Documento',
+    numero:'Número', nacionalidad:'Nacionalidad', nacimiento:'Fecha de nacimiento', celular:'Celular / WhatsApp', correo:'Correo',
+    correoAyuda:'Aquí te llega la copia de tu registro.', agregar:'+ Agregar acompañante ({n} de {m})', lleno:'Cupo completo ({m} de {m})',
+    vehiculo:'Llego en vehículo', placa:'Placa', consent:'Autorizo el tratamiento de mis datos personales para mi registro de ingreso, según la Ley 1581 de 2012.',
+    errConsent:'Debes aceptar para continuar.', enviar:'Enviar registro', enviando:'Enviando…', atras:'Volver', envioSeguro:'Envío seguro',
+    listoTit:'¡Listo, {n}!<br>Te esperamos', listoTxt:'Tu registro ya quedó enviado. Solo presenta tu documento al llegar.',
+    copia:'Te enviamos una copia de este registro a tu correo.', alojamiento:'Alojamiento', huespedes:'Huéspedes', personas:'{n} persona(s)', reserva:'Reserva',
+    errSalida:'La salida debe ser después de la entrada.', errCorreo:'Escribe un correo válido.', errRed:'No pudimos enviar tu registro. Revisa tu conexión e intenta de nuevo.',
+    docs:['Cédula','Pasaporte','Cédula de extranjería','Tarjeta de identidad','PEP / PPT'] },
+  en: { cargando:'Loading your stay…', noDispTit:'Link not available', noExiste:'This link is not valid. Please ask your host for the correct link.',
+    pausado:'This service is paused. Please contact your host.', tuAloja:'Your stay', entradaDesde:'Check-in from', salidaHasta:'Check-out by',
+    paso:'Step {n} of 3', p1:'Booking details', p2:'Guest details', hola:'Hi, welcome',
+    introTxt:'Complete your registration before you arrive. It takes less than 3 minutes and you’ll skip the line at the front desk.',
+    codigo:'Booking code', codigoAyuda:'You’ll find it in your Airbnb confirmation.', req:'This field is required.', entrada:'Check-in', salida:'Check-out',
+    horaLlegada:'Estimated arrival time', seguro:'Your data is protected and only used for building access and the registration required by law.',
+    continuar:'Continue', titular:'Main guest', acomp:'Guest', quitar:'Remove', nombres:'First name(s)', apellidos:'Last name(s)', documento:'ID type',
+    numero:'Number', nacionalidad:'Nationality', nacimiento:'Date of birth', celular:'Phone / WhatsApp', correo:'Email',
+    correoAyuda:'We’ll send a copy of your registration here.', agregar:'+ Add guest ({n} of {m})', lleno:'Full ({m} of {m})',
+    vehiculo:'I’m arriving by car', placa:'License plate', consent:'I authorize the processing of my personal data for my check-in, under Colombian Law 1581 of 2012.',
+    errConsent:'You must accept to continue.', enviar:'Submit registration', enviando:'Sending…', atras:'Back', envioSeguro:'Secure submission',
+    listoTit:'All set, {n}!<br>See you soon', listoTxt:'Your registration was sent. Just show your ID when you arrive.',
+    copia:'We sent a copy of this registration to your email.', alojamiento:'Stay', huespedes:'Guests', personas:'{n} guest(s)', reserva:'Booking',
+    errSalida:'Check-out must be after check-in.', errCorreo:'Enter a valid email.', errRed:'We couldn’t send your registration. Check your connection and try again.',
+    docs:['National ID (Cédula)','Passport','Foreign ID (Cédula de extranjería)','ID card (Tarjeta de identidad)','PEP / PPT'] },
+};
+const DOCS_VALOR = ['Cédula','Pasaporte','Cédula de extranjería','Tarjeta de identidad','PEP / PPT'];
+
+let lang = (navigator.language || 'es').startsWith('es') ? 'es' : 'en';
+let info = null, paso = 1, huespedes = [{}];
+const $ = id => document.getElementById(id);
+const t = (k, v = {}) => String(T[lang][k]).replace(/\{(\w)\}/g, (_, x) => v[x] ?? '');
+const clienteId = new URLSearchParams(location.search).get('c') || '';
+
+function traducir() {
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-t]').forEach(el => { el.innerHTML = t(el.dataset.t); });
+  $('es').classList.toggle('on', lang === 'es'); $('en').classList.toggle('on', lang === 'en');
+  if (info) pintarPaso(); dibujarHuespedes();
+}
+$('es').onclick = () => { leerHuespedes(); lang = 'es'; traducir(); };
+$('en').onclick = () => { leerHuespedes(); lang = 'en'; traducir(); };
+
+async function cargar() {
+  traducir();
+  if (!clienteId) return noDisponible('noExiste');
+  try {
+    const r = await fetch(API_URL + '?c=' + encodeURIComponent(clienteId));
+    const d = await r.json();
+    if (!d.ok) return noDisponible(d.motivo === 'pausado' ? 'pausado' : 'noExiste');
+    info = d;
+    $('producto').textContent = d.producto || 'Check-in JE STAY';
+    $('apto').textContent = (lang === 'es' ? 'Apartamento ' : 'Apartment ') + d.apartamento;
+    $('edif').textContent = d.edificio + ' · ' + d.ciudad;
+    $('hEnt').textContent = d.horaEntrada; $('hSal').textContent = d.horaSalida;
+    $('cargando').classList.add('oculto'); $('form').classList.remove('oculto');
+    pintarPaso(); dibujarHuespedes();
+  } catch (e) { noDisponible('errRed'); }
+}
+function noDisponible(k) { $('cargando').classList.add('oculto'); $('noDisponible').classList.remove('oculto'); $('noDispTxt').textContent = t(k); }
+
+function pintarPaso() {
+  $('apto').textContent = (lang === 'es' ? 'Apartamento ' : 'Apartment ') + info.apartamento;
+  $('pasoTxt').textContent = t('paso', { n: paso });
+  $('pasoNom').textContent = t(paso === 1 ? 'p1' : 'p2');
+  $('b2').classList.toggle('on', paso >= 2); $('b3').classList.toggle('on', paso >= 3);
+  $('paso1').classList.toggle('oculto', paso !== 1); $('paso2').classList.toggle('oculto', paso !== 2);
+}
+
+function marcar(id, mal, msg) {
+  const c = $(id).closest('.campo'); c.classList.toggle('mal', mal);
+  if (msg) c.querySelector('.error').textContent = msg;
+  return !mal;
+}
+
+$('sig1').onclick = () => {
+  let ok = true;
+  ok = marcar('codigo', !$('codigo').value.trim(), t('req')) && ok;
+  ok = marcar('entrada', !$('entrada').value, t('req')) && ok;
+  const salMal = !$('salida').value || ($('entrada').value && $('salida').value <= $('entrada').value);
+  ok = marcar('salida', salMal, !$('salida').value ? t('req') : t('errSalida')) && ok;
+  if (!ok) return;
+  paso = 2; pintarPaso(); window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+$('atras').onclick = () => { leerHuespedes(); paso = 1; pintarPaso(); };
+$('tieneVehiculo').onchange = e => $('campoPlaca').classList.toggle('oculto', !e.target.checked);
+
+function campoHtml(i, k, tipo, extra = '') {
+  return `<div class="campo"><label for="h${i}_${k}">${t(k)}</label><input id="h${i}_${k}" type="${tipo}" ${extra}><span class="error">${t('req')}</span></div>`;
+}
+function dibujarHuespedes() {
+  if (!info) return;
+  const max = Number(info.maxHuespedes) || 4;
+  $('huespedes').innerHTML = huespedes.map((h, i) => `
+    <div class="card">
+      <div class="cab"><div class="num"><div class="circ">${i + 1}</div><h3>${i === 0 ? t('titular') : t('acomp')}</h3></div>
+        ${i > 0 ? `<button type="button" class="quitar" data-quitar="${i}">${t('quitar')}</button>` : ''}</div>
+      <div class="dos">${campoHtml(i, 'nombres', 'text', 'autocomplete="given-name"')}${campoHtml(i, 'apellidos', 'text', 'autocomplete="family-name"')}</div>
+      <div class="dos">
+        <div class="campo"><label for="h${i}_tipoDoc">${t('documento')}</label><select id="h${i}_tipoDoc">
+          ${DOCS_VALOR.map((v, j) => `<option value="${v}">${T[lang].docs[j]}</option>`).join('')}</select></div>
+        ${campoHtml(i, 'numero', 'text', 'inputmode="text" autocomplete="off"')}
+      </div>
+      <div class="dos">${campoHtml(i, 'nacionalidad', 'text', 'autocomplete="country-name"')}${campoHtml(i, 'nacimiento', 'date')}</div>
+      ${i === 0 ? campoHtml(0, 'celular', 'tel', 'autocomplete="tel"') +
+        `<div class="campo"><label for="h0_correo">${t('correo')}</label><input id="h0_correo" type="email" autocomplete="email" placeholder="nombre@correo.com"><span class="ayuda">${t('correoAyuda')}</span><span class="error">${t('errCorreo')}</span></div>` : ''}
+    </div>`).join('');
+  huespedes.forEach((h, i) => {
+    const map = { nombres: h.nombres, apellidos: h.apellidos, tipoDoc: h.tipoDoc, numero: h.numDoc, nacionalidad: h.nacionalidad, nacimiento: h.nacimiento, celular: h.celular, correo: h.correo };
+    Object.entries(map).forEach(([k, v]) => { const el = $(`h${i}_${k}`); if (el && v) el.value = v; });
+    if (i > 0 && !h.nacionalidad && huespedes[0].nacionalidad) $(`h${i}_nacionalidad`).value = huespedes[0].nacionalidad;
+  });
+  document.querySelectorAll('[data-quitar]').forEach(b => b.onclick = () => { leerHuespedes(); huespedes.splice(Number(b.dataset.quitar), 1); dibujarHuespedes(); });
+  const lleno = huespedes.length >= max;
+  $('agregar').textContent = lleno ? t('lleno', { m: max }) : t('agregar', { n: huespedes.length + 1, m: max });
+  $('agregar').disabled = lleno;
+}
+$('agregar').onclick = () => { leerHuespedes(); huespedes.push({}); dibujarHuespedes(); };
+
+function leerHuespedes() {
+  if (!$('h0_nombres')) return;
+  huespedes = huespedes.map((_, i) => {
+    const v = k => ($(`h${i}_${k}`) || {}).value || '';
+    return { nombres: v('nombres').trim(), apellidos: v('apellidos').trim(), tipoDoc: v('tipoDoc'), numDoc: v('numero').trim(),
+      nacionalidad: v('nacionalidad').trim(), nacimiento: v('nacimiento'), celular: v('celular').trim(), correo: v('correo').trim() };
+  });
+}
+
+$('form').onsubmit = async e => {
+  e.preventDefault();
+  leerHuespedes();
+  let ok = true, primero = null;
+  huespedes.forEach((h, i) => {
+    ['nombres', 'apellidos', 'numero', 'nacionalidad', 'nacimiento'].concat(i === 0 ? ['celular'] : []).forEach(k => {
+      const vacio = !$(`h${i}_${k}`).value.trim();
+      if (!marcar(`h${i}_${k}`, vacio, t('req')) && !primero) primero = $(`h${i}_${k}`);
+      ok = ok && !vacio;
+    });
+  });
+  const correoOk = /^\S+@\S+\.\S+$/.test(huespedes[0].correo);
+  if (!marcar('h0_correo', !correoOk, t('errCorreo')) && !primero) primero = $('h0_correo');
+  ok = ok && correoOk;
+  const consent = $('consentimiento').checked;
+  $('errConsent').style.display = consent ? 'none' : 'block';
+  if (!ok || !consent) { (primero || $('consentimiento')).scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+
+  const btn = $('enviar'); btn.disabled = true; btn.querySelector('span').textContent = t('enviando');
+  $('aviso').style.display = 'none';
+  const datos = { c: clienteId, web: $('web').value, codigo: $('codigo').value.trim(), entrada: $('entrada').value, salida: $('salida').value,
+    horaLlegada: $('horaLlegada').value, placa: $('tieneVehiculo').checked ? $('placa').value.trim().toUpperCase() : '',
+    consentimiento: true, huespedes };
+  try {
+    const r = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(datos) });
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || t('errRed'));
+    mostrarListo(datos);
+  } catch (err) {
+    $('aviso').textContent = err.message && err.message !== 'Failed to fetch' ? err.message : t('errRed');
+    $('aviso').style.display = 'block';
+    btn.disabled = false; btn.querySelector('span').textContent = t('enviar');
+  }
+};
+
+function fechaBonita(iso) {
+  return new Date(iso + 'T12:00:00').toLocaleDateString(lang === 'es' ? 'es-CO' : 'en-US', { day: 'numeric', month: 'short' });
+}
+function mostrarListo(d) {
+  $('form').classList.add('oculto'); $('paso3').classList.remove('oculto');
+  $('listoTit').innerHTML = t('listoTit', { n: d.huespedes[0].nombres.split(' ')[0] });
+  const filas = [[t('alojamiento'), 'Apto ' + info.apartamento + ' · ' + info.edificio],
+    [t('entrada'), fechaBonita(d.entrada) + ' · ' + info.horaEntrada], [t('salida'), fechaBonita(d.salida) + ' · ' + info.horaSalida],
+    [t('huespedes'), t('personas', { n: d.huespedes.length })], [t('reserva'), d.codigo.toUpperCase()]];
+  $('resumen').innerHTML = filas.map(f => `<div><span>${f[0]}</span><b></b></div>`).join('');
+  $('resumen').querySelectorAll('b').forEach((b, i) => b.textContent = filas[i][1]);
+  window.scrollTo({ top: 0 });
+}
+
+cargar();
+</script>
+</body>
+</html>
