@@ -42,6 +42,9 @@ input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 
 .check{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted);margin-top:12px}
 .check input{width:18px;height:18px;accent-color:var(--accent)}
 .oculto{display:none!important}
+#nSol:not(:empty){background:#C2410C;color:#fff;border-radius:999px;font-size:11px;padding:2px 7px;margin-left:4px}
+.sol{padding:14px 0;border-bottom:1px solid #EFECE5}.sol:last-child{border:none}.sol b{display:block}.sol small{color:var(--muted);font-size:12px;display:block;margin:2px 0 8px}
+.sol .acciones{flex-direction:row}.si{background:var(--accent);color:#fff;border-color:var(--accent)}
 </style>
 </head>
 <body>
@@ -69,6 +72,7 @@ input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 
   <div id="panel" class="oculto">
     <div class="tabs">
       <button type="button" id="tNuevo" class="on">Nuevo cliente</button>
+      <button type="button" id="tSolicitudes">Solicitudes <span id="nSol"></span></button>
       <button type="button" id="tClientes">Clientes</button>
     </div>
 
@@ -116,6 +120,13 @@ input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 
       <div class="msg" id="msgCrear"></div>
     </form>
 
+    <div id="solicitudes" class="oculto">
+      <div class="card">
+        <h3>Solicitudes por aprobar</h3>
+        <p class="intro">Los propietarios se inscriben en <b>jestay-co.github.io/checkin/alta.html</b>. Revisa cada solicitud y apruébala para activarla.</p>
+        <div id="listaSol">Cargando…</div>
+      </div>
+    </div>
     <div id="clientes" class="oculto">
       <div class="card"><div id="lista">Cargando…</div></div>
       <form class="card" id="formClave">
@@ -171,18 +182,62 @@ $('entrar').onsubmit = async e => {
     await api('entrar');
     if ($('recordar').checked) guardar(CLAVE);
     mostrarPanel(true);
+    api('solicitudes').then(l => { $('nSol').textContent = l.length || ''; }).catch(() => {});
   } catch (err) { msg('msgEntrar', 'err', esc(err.message === 'Acceso no autorizado.' ? 'Clave incorrecta.' : err.message)); }
   $('btnEntrar').disabled = false; $('btnEntrar').textContent = 'Entrar';
 };
 $('salir').onclick = () => { guardar(''); CLAVE = ''; $('clave').value = ''; mostrarPanel(false); };
 
 function ver(cual) {
-  $('nuevo').classList.toggle('oculto', cual !== 'nuevo'); $('clientes').classList.toggle('oculto', cual !== 'clientes');
-  $('tNuevo').classList.toggle('on', cual === 'nuevo'); $('tClientes').classList.toggle('on', cual === 'clientes');
+  ['nuevo', 'solicitudes', 'clientes'].forEach(k => $(k).classList.toggle('oculto', cual !== k));
+  $('tNuevo').classList.toggle('on', cual === 'nuevo'); $('tSolicitudes').classList.toggle('on', cual === 'solicitudes'); $('tClientes').classList.toggle('on', cual === 'clientes');
   if (cual === 'clientes') cargarClientes();
+  if (cual === 'solicitudes') cargarSolicitudes();
 }
 $('tNuevo').onclick = () => ver('nuevo');
+$('tSolicitudes').onclick = () => ver('solicitudes');
 $('tClientes').onclick = () => ver('clientes');
+
+async function cargarSolicitudes() {
+  $('listaSol').textContent = 'Cargando…';
+  try {
+    const lista = await api('solicitudes');
+    $('nSol').textContent = lista.length || '';
+    if (!lista.length) { $('listaSol').textContent = 'No hay solicitudes pendientes.'; return; }
+    $('listaSol').innerHTML = lista.map(s =>
+      '<div class="sol"><b>' + esc(s.apto) + ' · ' + esc(s.propietario) + '</b><small>Cédula/NIT ' + esc(s.cedula || '—') + ' · ' + esc(s.correo) + ' · ' + esc(s.whatsapp) + ' · ' + esc(s.recibido) +
+      (s.calendario ? ' · con calendario de Airbnb' : ' · sin calendario') + '</small>' +
+      (s.repetido ? '<div class="err" style="margin-bottom:8px">⚠️ Ya hay un cliente activo para este apartamento. Si apruebas, quedarán dos.</div>' : '') +
+      (s.aprobando ? '<div class="err" style="margin-bottom:8px">Esta solicitud se está aprobando. Si no termina, vuelve a tocar «Aprobar» (o «Rechazar») en 10 minutos.</div>' : '') +
+      '<div class="acciones"><button class="mini si" type="button" data-aprobar="' + esc(s.id) + '" data-repetido="' + (s.repetido ? '1' : '') + '">' + (s.completar ? 'Completar aprobación' : 'Aprobar y activar') + '</button>' +
+      (s.completar ? '' : '<button class="mini" type="button" data-rechazar="' + esc(s.id) + '">Rechazar</button>') + '</div><div class="msg" id="m_' + esc(s.id) + '"></div></div>').join('');
+    const restar = () => { const n = Math.max(0, (Number($('nSol').textContent) || 1) - 1); $('nSol').textContent = n || ''; if (!n) $('listaSol').insertAdjacentHTML('beforeend', '<p class="intro">No quedan solicitudes pendientes.</p>'); };
+    const fila = b => b.closest('.acciones'), bloquear = (b, si) => fila(b).querySelectorAll('button').forEach(x => x.disabled = si);
+    document.querySelectorAll('[data-aprobar]').forEach(b => b.onclick = async () => {
+      const id = b.dataset.aprobar; let forzar = !!b.dataset.repetido;
+      if (forzar && !confirm('Ya hay un cliente activo para este apartamento. ¿Aprobar de todas formas?')) return;
+      bloquear(b, true); b.textContent = 'Activando…';
+      try {
+        let r;
+        try { r = await api('aprobar', { id, forzar }); }
+        catch (e) { // apareció otro cliente para ese apartamento después de cargar la lista
+          if (forzar || !/confírmalo/.test(e.message) || !confirm(e.message + '\n\n¿Aprobar de todas formas?')) throw e;
+          r = await api('aprobar', { id, forzar: true });
+        }
+        msg('m_' + id, r.hm && !r.hm.ok ? 'err' : 'ok', '✅ Cliente <b>' + esc(r.id) + '</b> activo. ' + (r.bienvenida ? 'Al propietario le llegó la bienvenida con su enlace: ' : '⚠️ El correo de bienvenida no salió: reenvíalo desde Clientes o mándale este enlace por WhatsApp: ') + '<b>' + esc(r.enlace) + '</b>' +
+          (r.hm && !r.hm.ok ? '<br>⚠️ Huésped Manager no aceptó el acceso: ' + esc(r.hm.motivo) + '. Corrígelo en Clientes.' : ''));
+        fila(b).remove(); restar();
+      } catch (err) { bloquear(b, false); b.textContent = 'Aprobar y activar'; msg('m_' + id, 'err', esc(err.message)); }
+    });
+    document.querySelectorAll('[data-rechazar]').forEach(b => b.onclick = async () => {
+      const id = b.dataset.rechazar;
+      if (!confirm('¿Rechazar esta solicitud? Se borran sus datos y se le avisa al propietario. No se puede deshacer.')) return;
+      bloquear(b, true);
+      try { await api('rechazar', { id }); msg('m_' + id, 'ok', 'Rechazada. Se borraron sus datos y se le avisó.'); fila(b).remove(); restar(); }
+      catch (err) { bloquear(b, false); msg('m_' + id, 'err', esc(err.message)); }
+    });
+  } catch (err) { $('listaSol').innerHTML = '<div class="err">' + esc(err.message) + '</div>'; }
+}
 
 $('nuevo').onsubmit = async e => {
   e.preventDefault();
@@ -205,9 +260,15 @@ async function cargarClientes() {
     if (!lista.length) { $('lista').textContent = 'Aún no tienes clientes.'; return; }
     $('lista').innerHTML = lista.map(c =>
       '<div class="cli"><div><b>' + esc(c.apto) + '</b><small>' + esc(c.propietario) + ' · ' + esc(c.id) + '</small>' +
-      '<span class="pill ' + esc(c.estado) + '">' + esc(c.estado) + '</span></div>' +
+      '<span class="pill ' + esc(c.estado) + '">' + esc(c.estado) + '</span>' + (c.bienvenida ? '' : ' <span class="pill PAUSADO">Bienvenida pendiente</span>') + '</div>' +
       '<div class="acciones"><button class="mini" type="button" data-estado="' + esc(c.id) + '">' + (c.estado === 'ACTIVO' ? 'Pausar' : 'Activar') + '</button>' +
-      '<button class="mini" type="button" data-copiar="' + esc(c.enlace) + '">Copiar enlace</button></div></div>').join('');
+      '<button class="mini" type="button" data-copiar="' + esc(c.enlace) + '">Copiar enlace</button>' +
+      (c.estado === 'ACTIVO' ? '<button class="mini" type="button" data-bienvenida="' + esc(c.id) + '">' + (c.bienvenida ? 'Reenviar bienvenida' : 'Enviar bienvenida') + '</button>' : '') + '</div></div>').join('');
+    document.querySelectorAll('[data-bienvenida]').forEach(b => b.onclick = async () => {
+      b.disabled = true; b.textContent = 'Enviando…';
+      try { await api('bienvenida', { id: b.dataset.bienvenida }); b.textContent = '¡Enviada!'; }
+      catch (err) { b.disabled = false; b.textContent = 'Reenviar bienvenida'; alerta(err.message); }
+    });
     document.querySelectorAll('[data-estado]').forEach(b => b.onclick = async () => {
       b.disabled = true;
       try { await api('estado', { id: b.dataset.estado }); cargarClientes(); } catch (err) { b.disabled = false; alerta(err.message); }
@@ -234,7 +295,7 @@ $('formClave').onsubmit = async e => {
   const guardada = leer();
   if (!guardada) return;
   CLAVE = guardada;
-  try { await api('entrar'); mostrarPanel(true); } catch (e) { guardar(''); CLAVE = ''; }
+  try { await api('entrar'); mostrarPanel(true); api('solicitudes').then(l => { $('nSol').textContent = l.length || ''; }).catch(() => {}); } catch (e) { guardar(''); CLAVE = ''; }
 })();
 </script>
 </body>
