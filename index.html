@@ -306,7 +306,7 @@ $('form').onsubmit = async e => {
 
   const btn = $('enviar'); btn.disabled = true; btn.querySelector('span').textContent = t('enviando');
   $('aviso').style.display = 'none';
-  const datos = { cliente: clienteId, web: $('web').value, codigo: $('codigo').value.trim(), entrada: $('entrada').value, salida: $('salida').value,
+  const datos = { cliente: clienteId, lang, web: $('web').value, codigo: $('codigo').value.trim(), entrada: $('entrada').value, salida: $('salida').value,
     horaLlegada: $('horaLlegada').value, placa: $('tieneVehiculo').checked ? $('placa').value.trim().toUpperCase() : '',
     consentimiento: true, huespedes };
   try {
