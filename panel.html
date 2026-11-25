@@ -100,6 +100,11 @@ input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 
       </div>
       <div class="ayuda">La clave no se guarda en la hoja: queda en la zona privada del sistema.</div>
 
+      <h3>Calendario de Airbnb</h3>
+      <label for="icalAirbnb">Enlace de «Exportar calendario» (recomendado)</label>
+      <input id="icalAirbnb" inputmode="url" placeholder="https://www.airbnb.com/calendar/ical/….ics?s=…">
+      <div class="ayuda">Con este enlace las reservas de Airbnb se comprueban solas. Sin él, el propietario confirma cada registro con un botón.</div>
+
       <h3>Aseo y plan</h3>
       <label for="correosAseo">Correo(s) del personal de aseo *</label>
       <input id="correosAseo" required placeholder="aseo1@gmail.com, aseo2@gmail.com">
@@ -122,6 +127,15 @@ input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 
         <button class="btn" type="submit">Actualizar clave</button>
         <div class="msg" id="msgClave"></div>
       </form>
+      <form class="card" id="formIcal">
+        <h3>Calendario de Airbnb de un cliente</h3>
+        <div class="fila">
+          <div><label for="iId">ID del cliente</label><input id="iId" placeholder="CX1A2B3C" required></div>
+          <div><label for="iUrl">Enlace del calendario de Airbnb</label><input id="iUrl" inputmode="url" placeholder="Vacío = el propietario confirma cada reserva"></div>
+        </div>
+        <button class="btn" type="submit">Guardar calendario</button>
+        <div class="msg" id="msgIcal"></div>
+      </form>
     </div>
   </div>
 </div>
@@ -129,7 +143,7 @@ input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbyWmI8cPMKA1e286-Xe8MUNn-2Kb1rebqCHjd8fDPRUKed7xPmvxk3A6MxrGqY0fWAX/exec';
 const CAMPOS = ['propietario','cedula','whatsapp','correo','edificio','apartamento','horaEntrada','horaSalida',
-  'maxHuespedes','urlHM','usuarioHM','claveHM','correosAseo','plan','proximoPago'];
+  'maxHuespedes','urlHM','usuarioHM','claveHM','correosAseo','plan','proximoPago','icalAirbnb'];
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let CLAVE = '';
@@ -177,7 +191,9 @@ $('nuevo').onsubmit = async e => {
   try {
     const r = await api('crear', { datos });
     $('nuevo').reset();
-    msg('msgCrear', 'ok', '✅ Cliente <b>' + esc(r.id) + '</b> creado y bienvenida enviada.<br><br>Enlace de check-in:<br><b>' + esc(r.enlace) + '</b>');
+    const avisos = (r.hm && !r.hm.ok ? '<br>⚠️ Huésped Manager no aceptó el acceso: ' + esc(r.hm.motivo) + '. Corrígelo en «Cambiar clave de Huésped Manager».' : '') +
+      (r.bienvenida === false ? '<br>⚠️ El correo de bienvenida no salió; envíale el enlace al propietario.' : '');
+    msg('msgCrear', r.hm && !r.hm.ok ? 'err' : 'ok', '✅ Cliente <b>' + esc(r.id) + '</b> creado' + (r.bienvenida === false ? '' : ' y bienvenida enviada') + '.' + avisos + '<br><br>Enlace de check-in:<br><b>' + esc(r.enlace) + '</b>');
   } catch (err) { msg('msgCrear', 'err', esc(err.message)); }
   b.disabled = false; b.textContent = 'Crear cliente y enviar bienvenida';
 };
@@ -203,6 +219,11 @@ async function cargarClientes() {
 }
 function alerta(t) { $('lista').insertAdjacentHTML('afterbegin', '<div class="err">' + esc(t) + '</div>'); }
 
+$('formIcal').onsubmit = async e => {
+  e.preventDefault(); msg('msgIcal');
+  try { const t = await api('ical', { id: $('iId').value, ical: $('iUrl').value.trim() }); msg('msgIcal', 'ok', esc(t)); }
+  catch (err) { msg('msgIcal', 'err', esc(err.message)); }
+};
 $('formClave').onsubmit = async e => {
   e.preventDefault(); msg('msgClave');
   try { const t = await api('clave', { id: $('cId').value, nueva: $('cClave').value }); $('cClave').value = ''; msg('msgClave', 'ok', esc(t)); }
