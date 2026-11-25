@@ -15,7 +15,7 @@ body{margin:0;background:var(--ground);font-family:Inter,system-ui,sans-serif;co
 .marca{display:flex;align-items:center;gap:10px}
 .logo{width:38px;height:38px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center}
 .marca b{font-family:Manrope,sans-serif;font-size:16px;display:block}.marca small{font-size:12px;color:var(--muted)}
-.salir{border:1px solid var(--line);background:#fff;border-radius:10px;height:36px;padding:0 12px;font:600 13px Inter,sans-serif;color:var(--ink);cursor:pointer}
+.salir{white-space:nowrap;border:1px solid var(--line);background:#fff;border-radius:10px;height:36px;padding:0 12px;font:600 13px Inter,sans-serif;color:var(--ink);cursor:pointer}
 .card{background:#fff;border:1px solid #E6E2D9;border-radius:18px;padding:18px;margin-bottom:12px}
 h1{font-family:Manrope,sans-serif;font-size:20px;margin:0 0 6px}
 h3{font-size:13px;color:var(--accent);margin:18px 0 2px}h3:first-child{margin-top:0}
@@ -54,13 +54,16 @@ input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 
       <div class="logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg></div>
       <div><b>Panel · Check-in JE STAY</b><small>Solo para administración</small></div>
     </div>
-    <button type="button" class="salir oculto" id="salir">Salir</button>
+    <div style="display:flex;gap:6px"><button type="button" class="salir oculto" id="miAcceso">Mi acceso</button><button type="button" class="salir oculto" id="salir">Salir</button></div>
   </div>
 
   <!-- ENTRAR -->
   <form id="entrar" class="card">
     <h1>Entrar al panel</h1>
-    <p class="intro">Escribe la clave del panel.</p>
+    <p class="intro">Escribe tu usuario y tu clave personal.</p>
+    <label for="usuario">Usuario</label>
+    <input id="usuario" autocomplete="username" autocapitalize="none" spellcheck="false">
+    <div class="ayuda">¿Primera vez? Deja el usuario vacío y escribe la clave de siempre: luego creas tu usuario.</div>
     <label for="clave">Clave</label>
     <input id="clave" type="password" autocomplete="current-password" required>
     <label class="check"><input type="checkbox" id="recordar" checked> Recordar en este dispositivo</label>
@@ -69,7 +72,27 @@ input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 
   </form>
 
   <!-- PANEL -->
+  <!-- MI ACCESO: crear o cambiar el usuario y la clave personal -->
+  <form id="acceso" class="card oculto">
+    <h1 id="accTitulo">Crea tu usuario y tu clave</h1>
+    <p class="intro" id="accIntro">Desde ahora entrarás al panel con tu propio usuario y una clave que solo tú conoces. La clave antigua deja de servir.</p>
+    <label for="accUsuario">Usuario</label>
+    <input id="accUsuario" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="por ejemplo: jose">
+    <div class="ayuda">De 3 a 40 letras o números, sin espacios ni tildes.</div>
+    <label for="accActual" id="accActualTxt">Clave antigua del panel</label>
+    <input id="accActual" type="password" autocomplete="current-password">
+    <label for="accNueva">Clave nueva</label>
+    <input id="accNueva" type="password" autocomplete="new-password">
+    <div class="ayuda">Mínimo 8 caracteres. Mejor una frase fácil de recordar para ti, por ejemplo con guiones.</div>
+    <label for="accRepite">Repite la clave nueva</label>
+    <input id="accRepite" type="password" autocomplete="new-password">
+    <button class="btn" type="submit" id="btnAcceso">Guardar</button>
+    <button class="mini" type="button" id="accCancelar" style="margin-top:8px">Volver al panel</button>
+    <div class="msg" id="msgAcceso"></div>
+  </form>
+
   <div id="panel" class="oculto">
+    <div class="msg" id="msgNuevoAviso"></div>
     <div class="tabs">
       <button type="button" id="tNuevo" class="on">Nuevo cliente</button>
       <button type="button" id="tSolicitudes">Solicitudes <span id="nSol"></span></button>
@@ -157,36 +180,70 @@ const CAMPOS = ['propietario','cedula','whatsapp','correo','edificio','apartamen
   'maxHuespedes','urlHM','usuarioHM','claveHM','correosAseo','plan','proximoPago','icalAirbnb'];
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-let CLAVE = '';
-const guardar = v => { try { v ? localStorage.setItem('cjs_clave', v) : localStorage.removeItem('cjs_clave'); } catch (e) {} };
-const leer = () => { try { return localStorage.getItem('cjs_clave') || ''; } catch (e) { return ''; } };
+// Se guarda la sesión (nunca la clave). «Recordar» = 30 días en este dispositivo; si no, solo mientras la pestaña esté abierta.
+let SESION = '', CREAR = false, USUARIO = '';
+try { localStorage.removeItem('cjs_clave'); } catch (e) {} // la versión anterior guardaba la clave: se borra
+const guardar = (v, recordar) => { try { localStorage.removeItem('cjs_sesion'); sessionStorage.removeItem('cjs_sesion'); if (v) (recordar ? localStorage : sessionStorage).setItem('cjs_sesion', v); } catch (e) {} };
+const recordando = () => { try { return !!localStorage.getItem('cjs_sesion'); } catch (e) { return false; } };
+const leer = () => { try { return localStorage.getItem('cjs_sesion') || sessionStorage.getItem('cjs_sesion') || ''; } catch (e) { return ''; } };
 
 async function api(accion, extra) {
   const r = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify(Object.assign({ accion, clave: CLAVE }, extra || {})) });
+    body: JSON.stringify(Object.assign({ accion, sesion: SESION }, extra || {})) });
   const d = await r.json();
-  if (!d.ok) throw new Error(d.error || 'Algo salió mal.');
+  if (!d.ok) {
+    if (/sesión venció/.test(d.error || '') && accion !== 'entrar') { guardar(''); SESION = ''; mostrarPanel(false); msg('msgEntrar', 'err', 'Tu sesión venció. Entra de nuevo.'); }
+    throw new Error(d.error || 'Algo salió mal.');
+  }
   return d.datos;
 }
 const msg = (id, tipo, html) => { $(id).innerHTML = html ? '<div class="' + tipo + '">' + html + '</div>' : ''; };
 
 function mostrarPanel(si) {
-  $('entrar').classList.toggle('oculto', si); $('panel').classList.toggle('oculto', !si); $('salir').classList.toggle('oculto', !si);
+  const acceso = si && CREAR; // sin usuario propio todavía: primero se crea
+  $('entrar').classList.toggle('oculto', si); $('panel').classList.toggle('oculto', !si || acceso); $('acceso').classList.toggle('oculto', !acceso);
+  $('salir').classList.toggle('oculto', !si); $('miAcceso').classList.toggle('oculto', !si || CREAR);
+  if (acceso) formAcceso(true);
+  if (si && !CREAR) api('solicitudes').then(l => { $('nSol').textContent = l.length || ''; }).catch(() => {});
 }
+function formAcceso(crear) {
+  $('accTitulo').textContent = crear ? 'Crea tu usuario y tu clave' : 'Mi usuario y mi clave';
+  $('accIntro').textContent = crear ? 'Desde ahora entrarás al panel con tu propio usuario y una clave que solo tú conoces. La clave antigua deja de servir.'
+    : 'Aquí cambias tu usuario o tu clave. Al guardar se cierran las sesiones abiertas en otros dispositivos.';
+  $('accActualTxt').textContent = crear ? 'Clave antigua del panel' : 'Clave actual';
+  $('accCancelar').classList.toggle('oculto', crear);
+  $('accUsuario').value = USUARIO; ['accActual', 'accNueva', 'accRepite'].forEach(k => $(k).value = ''); msg('msgAcceso');
+}
+$('miAcceso').onclick = () => { $('panel').classList.add('oculto'); $('acceso').classList.remove('oculto'); formAcceso(false); };
+$('accCancelar').onclick = () => { $('acceso').classList.add('oculto'); $('panel').classList.remove('oculto'); };
+$('acceso').onsubmit = async e => {
+  e.preventDefault(); msg('msgAcceso');
+  if ($('accNueva').value !== $('accRepite').value) { msg('msgAcceso', 'err', 'Las dos claves nuevas no son iguales.'); return; }
+  const b = $('btnAcceso'); b.disabled = true; b.textContent = 'Guardando…';
+  try {
+    const r = await api('usuario', { usuario: $('accUsuario').value.trim(), actual: $('accActual').value, nueva: $('accNueva').value, recordar: recordando() });
+    SESION = r.sesion; USUARIO = r.usuario; guardar(SESION, recordando()); ['accActual', 'accNueva', 'accRepite'].forEach(k => $(k).value = '');
+    const eraCrear = CREAR; CREAR = false; mostrarPanel(true);
+    msg('msgNuevoAviso', 'ok', (eraCrear ? '✅ Listo. Desde ahora entras con el usuario <b>' : '✅ Guardado. Tu usuario es <b>') + esc(r.usuario) + '</b> y tu clave nueva.');
+  } catch (err) { msg('msgAcceso', 'err', esc(err.message)); }
+  b.disabled = false; b.textContent = 'Guardar';
+};
 
 $('entrar').onsubmit = async e => {
   e.preventDefault();
-  CLAVE = $('clave').value.trim(); msg('msgEntrar');
+  msg('msgEntrar');
   $('btnEntrar').disabled = true; $('btnEntrar').textContent = 'Entrando…';
   try {
-    await api('entrar');
-    if ($('recordar').checked) guardar(CLAVE);
+    const r = await api('entrar', { usuario: $('usuario').value.trim(), clave: $('clave').value, recordar: $('recordar').checked });
+    const escrita = $('clave').value;
+    SESION = r.sesion; CREAR = r.crearUsuario; USUARIO = r.usuario || ''; guardar(SESION, $('recordar').checked);
+    $('clave').value = '';
     mostrarPanel(true);
-    api('solicitudes').then(l => { $('nSol').textContent = l.length || ''; }).catch(() => {});
-  } catch (err) { msg('msgEntrar', 'err', esc(err.message === 'Acceso no autorizado.' ? 'Clave incorrecta.' : err.message)); }
+    if (CREAR) $('accActual').value = escrita; // la clave antigua ya la escribiste: no hay que repetirla
+  } catch (err) { msg('msgEntrar', 'err', esc(err.message)); }
   $('btnEntrar').disabled = false; $('btnEntrar').textContent = 'Entrar';
 };
-$('salir').onclick = () => { guardar(''); CLAVE = ''; $('clave').value = ''; mostrarPanel(false); };
+$('salir').onclick = () => { const s = SESION; guardar(''); SESION = ''; $('clave').value = ''; ['accActual', 'accNueva', 'accRepite'].forEach(k => $(k).value = ''); msg('msgNuevoAviso'); mostrarPanel(false); if (s) fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ accion: 'salir', sesion: s }) }).catch(() => {}); };
 
 function ver(cual) {
   ['nuevo', 'solicitudes', 'clientes'].forEach(k => $(k).classList.toggle('oculto', cual !== k));
@@ -294,8 +351,9 @@ $('formClave').onsubmit = async e => {
 (async () => {
   const guardada = leer();
   if (!guardada) return;
-  CLAVE = guardada;
-  try { await api('entrar'); mostrarPanel(true); api('solicitudes').then(l => { $('nSol').textContent = l.length || ''; }).catch(() => {}); } catch (e) { guardar(''); CLAVE = ''; }
+  SESION = guardada;
+  try { const r = await api('yo'); CREAR = r.crearUsuario; USUARIO = r.usuario || ''; mostrarPanel(true); }
+  catch (e) { if (/sesión venció/.test(e.message)) { guardar(''); SESION = ''; } else { SESION = ''; msg('msgEntrar', 'err', esc(e.message)); } } // otro error (sin internet, demasiados intentos): la sesión guardada no se pierde
 })();
 </script>
 </body>
