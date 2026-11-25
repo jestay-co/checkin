@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Inscripción · Check-in JE STAY</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#14223B;--muted:#5B6577;--line:#DCD8CF;--ground:#F6F4EF;--accent:#0E6B62;--accent-dark:#0A4F48;--soft:#E3F1EE;--danger:#A32D2D}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);font-family:Inter,system-ui,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+.app{max-width:560px;margin:0 auto;padding:18px 16px 56px}
+.marca{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.logo{width:38px;height:38px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center}
+.marca b{font-family:Manrope,sans-serif;font-size:16px;display:block}.marca small{font-size:12px;color:var(--muted)}
+.hero{background:var(--ink);color:#fff;border-radius:20px;padding:22px 20px;margin-bottom:14px}
+.hero h1{font-family:Manrope,sans-serif;font-size:24px;line-height:1.2;margin:0 0 8px}
+.hero p{margin:0;font-size:14px;line-height:1.55;color:#D6DCE6}
+.pasos{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.pasos span{font-size:12px;background:rgba(255,255,255,.1);border-radius:999px;padding:5px 10px}
+.card{background:#fff;border:1px solid #E6E2D9;border-radius:18px;padding:18px;margin-bottom:12px}
+h2{font-family:Manrope,sans-serif;font-size:17px;margin:0 0 2px}
+.sub{margin:0 0 4px;font-size:13px;color:var(--muted);line-height:1.5}
+label{display:block;font-size:13px;font-weight:600;margin:14px 0 6px}
+input{width:100%;height:48px;border:1px solid var(--line);border-radius:12px;padding:0 12px;font:16px Inter,sans-serif;color:var(--ink);background:#FBFAF7}
+input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(14,107,98,.15)}
+.fila{display:flex;gap:10px}.fila>div{flex:1;min-width:0}
+.ayuda{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.45}
+details{margin-top:10px;font-size:13px;color:var(--muted)}summary{cursor:pointer;color:var(--accent);font-weight:600}
+details ol{margin:8px 0 0;padding-left:18px;line-height:1.6}
+.contrato{max-height:280px;overflow:auto;border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#FBFAF7;font-size:13px;color:var(--ink);margin-top:10px}
+.contrato h2{font-size:15px}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.45;margin-top:14px}
+.check input{width:20px;height:20px;flex:none;margin-top:2px;accent-color:var(--accent)}
+.btn{width:100%;height:54px;border:none;border-radius:14px;background:var(--accent);color:#fff;font:600 16px Inter,sans-serif;cursor:pointer;margin-top:6px}
+.btn:disabled{opacity:.6}
+.aviso{padding:12px 14px;border-radius:12px;background:#FCEBEB;color:#791F1F;font-size:14px;margin-bottom:12px;display:none}
+input.mal{border-color:var(--danger);background:#FDF5F5}
+.listo{text-align:center;padding:36px 20px}
+.listo .ok{width:76px;height:76px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+.listo h1{font-family:Manrope,sans-serif;font-size:24px;margin:0 0 10px}
+.listo p{margin:0 0 8px;font-size:15px;line-height:1.55;color:var(--muted)}
+.trampa{position:absolute;left:-9999px}
+.oculto{display:none!important}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="marca">
+    <div class="logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+    <div><b>Check-in JE STAY</b><small>Inscripción de propietarios</small></div>
+  </div>
+
+  <form id="form" novalidate>
+    <div class="hero">
+      <h1>Activa el check-in automático de tu apartamento</h1>
+      <p>Tus huéspedes llenan un formulario y nosotros los registramos en Huésped Manager, avisamos a tu personal de aseo y te confirmamos por correo. Llena estos datos y te avisamos cuando quede activo.</p>
+      <div class="pasos"><span>1 · Tus datos</span><span>2 · Huésped Manager</span><span>3 · Aseo</span><span>4 · Contrato</span></div>
+    </div>
+
+    <div class="aviso" id="aviso"></div>
+
+    <div class="card">
+      <h2>Tus datos</h2>
+      <p class="sub">A este correo te llegan las confirmaciones de cada check-in.</p>
+      <label for="propietario">Nombre completo</label><input id="propietario" autocomplete="name" required>
+      <div class="fila">
+        <div><label for="cedula">Cédula o NIT</label><input id="cedula" inputmode="numeric" required></div>
+        <div><label for="whatsapp">WhatsApp</label><input id="whatsapp" type="tel" autocomplete="tel" required></div>
+      </div>
+      <label for="correo">Correo</label><input id="correo" type="email" autocomplete="email" required>
+    </div>
+
+    <div class="card">
+      <h2>Tu apartamento</h2>
+      <div class="fila">
+        <div><label for="edificio">Edificio</label><input id="edificio" value="Reserva del Mar" required></div>
+        <div><label for="apartamento">Apartamento</label><input id="apartamento" inputmode="numeric" required></div>
+      </div>
+      <div class="fila">
+        <div><label for="horaEntrada">Hora de entrada</label><input id="horaEntrada" type="time" value="15:00"></div>
+        <div><label for="horaSalida">Hora de salida</label><input id="horaSalida" type="time" value="12:00"></div>
+      </div>
+      <label for="maxHuespedes">Máximo de huéspedes</label><input id="maxHuespedes" type="number" min="1" max="20" value="4">
+    </div>
+
+    <div class="card">
+      <h2>Huésped Manager</h2>
+      <p class="sub">Con tu usuario registramos a cada huésped por ti. Tu clave se guarda de forma privada y nunca aparece en hojas ni correos.</p>
+      <label for="urlHM">Dirección de Huésped Manager del edificio</label><input id="urlHM" inputmode="url" placeholder="reservadelmar.huespedmanager.com" required>
+      <div class="fila">
+        <div><label for="usuarioHM">Usuario</label><input id="usuarioHM" autocomplete="off" required></div>
+        <div><label for="claveHM">Clave</label><input id="claveHM" type="password" autocomplete="new-password" required></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Calendario de Airbnb <span style="font-weight:500;color:var(--muted);font-size:13px">(recomendado)</span></h2>
+      <p class="sub">Con él comprobamos solos que cada reserva es real. Sin él, te llega un correo para confirmar cada registro con un botón.</p>
+      <label for="icalAirbnb">Enlace de «Exportar calendario»</label><input id="icalAirbnb" inputmode="url" placeholder="https://www.airbnb.com/calendar/ical/….ics?s=…">
+      <details><summary>¿Dónde lo encuentro?</summary><ol>
+        <li>En Airbnb, entra a <b>Calendario</b> y elige este apartamento.</li>
+        <li>Abre <b>Disponibilidad</b> y busca <b>Conectar calendarios</b>.</li>
+        <li>Toca <b>Exportar calendario</b> y <b>Copiar enlace</b>.</li>
+        <li>Pégalo aquí.</li></ol></details>
+    </div>
+
+    <div class="card">
+      <h2>Personal de aseo</h2>
+      <p class="sub">Les avisamos cada llegada y salida, sin datos personales de los huéspedes.</p>
+      <label for="correosAseo">Correo(s) del aseo</label><input id="correosAseo" placeholder="aseo1@gmail.com, aseo2@gmail.com" required>
+      <div class="ayuda">Si son varias personas, sepáralos con coma.</div>
+    </div>
+
+    <div class="card">
+      <h2>Contrato de datos personales</h2>
+      <p class="sub">Tú eres el responsable de los datos de tus huéspedes y JE STAY los trata por tu cuenta (Ley 1581 de 2012). Léelo antes de aceptar; la copia te llega por correo al activarse el servicio.</p>
+      <div class="contrato" id="contrato">Cargando el contrato…</div>
+      <label class="check"><input type="checkbox" id="acepta"> <span>Leí y acepto el contrato de transmisión de datos personales con JE STAY.</span></label>
+      <input class="trampa" id="web" tabindex="-1" autocomplete="off" aria-hidden="true">
+    </div>
+
+    <button class="btn" id="enviar" type="submit">Enviar solicitud</button>
+    <p class="ayuda" style="text-align:center;margin-top:10px">¿Dudas? Escríbenos al WhatsApp +57 311 795 8688.</p>
+  </form>
+
+  <div class="listo oculto" id="listo">
+    <div class="ok"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#0E6B62" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+    <h1>¡Recibimos tu solicitud!</h1>
+    <p>Vamos a revisar tus datos. Cuando quede activo te llega un correo con tu enlace de check-in y la copia del contrato que aceptaste.</p>
+  </div>
+</div>
+<script>
+const API_URL = 'https://script.google.com/macros/s/AKfycbyWmI8cPMKA1e286-Xe8MUNn-2Kb1rebqCHjd8fDPRUKed7xPmvxk3A6MxrGqY0fWAX/exec';
+const $ = id => document.getElementById(id);
+const CAMPOS = ['propietario','cedula','whatsapp','correo','edificio','apartamento','horaEntrada','horaSalida','maxHuespedes','urlHM','usuarioHM','claveHM','icalAirbnb','correosAseo'];
+const OBLIG = ['propietario','cedula','whatsapp','correo','edificio','apartamento','urlHM','usuarioHM','claveHM','correosAseo'];
+
+fetch(API_URL + '?contrato=1').then(r => r.json()).then(d => {
+  // El contrato lo arma el servidor (texto fijo, sin datos de nadie); se muestra tal cual.
+  if (d.ok && d.html) $('contrato').innerHTML = d.html; else throw 0;
+}).catch(() => { $('contrato').textContent = 'No pudimos cargar el contrato. Recarga la página.'; });
+
+function aviso(t) { $('aviso').textContent = t; $('aviso').style.display = t ? 'block' : 'none'; if (t) $('aviso').scrollIntoView({behavior: 'smooth', block: 'center'}); }
+
+document.querySelectorAll('input').forEach(i => i.addEventListener('input', () => i.classList.remove('mal')));
+$('form').onsubmit = async e => {
+  e.preventDefault(); aviso('');
+  let falta = null;
+  OBLIG.forEach(k => { const vacio = !$(k).value.trim(); $(k).classList.toggle('mal', vacio); if (vacio && !falta) falta = $(k); });
+  if (!falta && !/^[^\s@,;]+@[^\s@,;]+\.[a-z]{2,}$/i.test($('correo').value.trim())) { falta = $('correo'); $('correo').classList.add('mal'); }
+  if (falta) { aviso('Revisa los campos marcados en rojo.'); falta.focus(); return; }
+  if (!$('acepta').checked) { aviso('Para continuar, lee y acepta el contrato de datos personales.'); return; }
+  const datos = {}; CAMPOS.forEach(k => datos[k] = $(k).value.trim());
+  const b = $('enviar'); b.disabled = true; b.textContent = 'Enviando…';
+  try {
+    const r = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ accion: 'solicitar', web: $('web').value, acepta: true, datos }) });
+    const d = await r.json();
+    if (!d.ok) { const e = new Error(d.error || 'No pudimos enviar tu solicitud.'); e.servidor = true; throw e; }
+    $('claveHM').value = '';
+    $('form').classList.add('oculto'); $('listo').classList.remove('oculto'); window.scrollTo({ top: 0 });
+  } catch (err) {
+    // Solo se muestran los mensajes del servidor (en español); cualquier otro error del navegador se explica en español.
+    aviso(err.servidor ? err.message : 'No pudimos enviar tu solicitud. Revisa tu conexión e intenta de nuevo.');
+    b.disabled = false; b.textContent = 'Enviar solicitud';
+  }
+};
+</script>
+</body>
+</html>
